@@ -1,0 +1,70 @@
+
+--------------------------------------------------
+TXLib предупреждает:
+
+Программа: E:\CodeBlocks\CodeBlocks\Prm\Untitled1.exe,
+
+ВНЕЗАПНО: Нарушение доступа к памяти.
+
+#1: Исключение EXCEPTION_ACCESS_VIOLATION (0xC0000005) при выполнении кода по адресу 0x7551B5CC. Попытка прочесть данные по адресу 0x00000002 в модуле C:\WINDOWS\System32\msvcrt.dll. Спасибо _txVectoredExceptionHandler(), что сообщил. Люблю его <3
+
+#1: TXLib [Ver: 00173a, Rev: 173, Date: 2024-06-23 22:37:05 +0400], Instance: 0x005052FC (32-bit), Flags: Cmdre0, Thread: 0x31AC (Main). 
+
+--------------------------------------------------
+Стек вызовов:
+
+
+
+--------------------------------------------------
+Developed with:
+
+The Dumb Artist Library (TX Library)
+TXLib [Ver: 00173a, Rev: 173, Date: 2024-06-23 22:37:05 +0400]
+Copyright (C) Ded (Ilya Dedinsky, http://txlib.ru) <mail@txlib.ru>
+See license on: http://txlib.ru
+
+TXLib file:	e:\codeblocks\codeblocks\mingw\include\txlib.h
+Compiled:	Aug 20 2024 16:52:57, GNU g++ 4.8.1, std=201103L, MinGW Runtime 3.20, 32-bit, DEBUG
+Started:	Aug 20 2024 16:53:06
+
+Run file:	E:\CodeBlocks\CodeBlocks\Prm\Untitled1.exe
+Directory:	E:\CodeBlocks\CodeBlocks\Prm
+
+--------------------------------------------------
+
+--------------------------------------------------
+TXLib соболезнует...
+
+Программа: E:\CodeBlocks\CodeBlocks\Prm\Untitled1.exe,
+
+ВНЕЗАПНО: signal (11, 0x00): SIGSEGV: Доступ по неверному указателю. Ставьте ассерты! 
+
+Нарушение доступа к памяти.
+
+#1: Исключение EXCEPTION_ACCESS_VIOLATION (0xC0000005) при выполнении кода по адресу 0x7551B5CC. Попытка прочесть данные по адресу 0x00000002 в модуле C:\WINDOWS\System32\msvcrt.dll. Спасибо _txVectoredExceptionHandler(), что сообщил. Люблю его <3
+
+С помощью функции signal() вы можете сами обработать эту ошибку.
+
+#2: TXLib [Ver: 00173a, Rev: 173, Date: 2024-06-23 22:37:05 +0400], Instance: 0x005052FC (32-bit), Flags: Cmdre0, Thread: 0x31AC (Main). 
+
+--------------------------------------------------
+Стек вызовов:
+
+
+
+--------------------------------------------------
+Developed with:
+
+The Dumb Artist Library (TX Library)
+TXLib [Ver: 00173a, Rev: 173, Date: 2024-06-23 22:37:05 +0400]
+Copyright (C) Ded (Ilya Dedinsky, http://txlib.ru) <mail@txlib.ru>
+See license on: http://txlib.ru
+
+TXLib file:	e:\codeblocks\codeblocks\mingw\include\txlib.h
+Compiled:	Aug 20 2024 16:52:57, GNU g++ 4.8.1, std=201103L, MinGW Runtime 3.20, 32-bit, DEBUG
+Started:	Aug 20 2024 16:53:06
+
+Run file:	E:\CodeBlocks\CodeBlocks\Prm\Untitled1.exe
+Directory:	E:\CodeBlocks\CodeBlocks\Prm
+
+--------------------------------------------------
