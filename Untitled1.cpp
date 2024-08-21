@@ -3,42 +3,44 @@
 #include <iostream>
 #include <cmath>
 
-void entering_values(double mass[3]);
+void entering_values(double values_coefficients[3]);
 void cleaning_buffer();
-//int def_quantity();
+int def_quantity(double values_coefficients[3]);
+void calculations(double values_coefficients[3], int amount);
 
-#define EPSILON = 1e-9;
+const double EPSILON = 1e-9;
 
 
-//Основная программа
-int main ()
+//РћСЃРЅРѕРІРЅР°СЏ РїСЂРѕРіСЂР°РјРјР°
+int main()
 {
     setlocale(LC_ALL, "Russian");
     double values_coefficients[3];
     entering_values(values_coefficients);
-    for (int i = 0; i < 3; i++)
-    {
-        printf("%lf ", values_coefficients[i]);
-    }
+    calculations(values_coefficients, def_quantity(values_coefficients));
+//    for (int i = 0; i < 3; i++)
+//    {
+//        printf("%lf ", values_coefficients[i]);
+//    }
     return 0;
 }
 
 
-//Ввод коэффициентов
+//Р’РІРѕРґ РєРѕСЌС„С„РёС†РёРµРЅС‚РѕРІ
 void entering_values(double values_coefficients[3])
 {
     char name_coefficients[] = "abc";
     for (int i = 0; i < 3; i++)
     {
-        char tmp;
-        int res;
+        char tmp = 0;
+        int res = 0;
         while (tmp != '\n' || res != 2)
         {
-            printf("Введите коэффициент %c: ", name_coefficients[i]);
+            printf("Р’РІРµРґРёС‚Рµ РєРѕСЌС„С„РёС†РёРµРЅС‚ %c: ", name_coefficients[i]);
             res = scanf("%lf%c", &values_coefficients[i], &tmp);
             if (tmp != '\n' || res != 2)
             {
-                printf("Ошибка!\nМожно вводить только числа.\n");
+                printf("РћС€РёР±РєР°!\nРњРѕР¶РЅРѕ РІРІРѕРґРёС‚СЊ С‚РѕР»СЊРєРѕ С‡РёСЃР»Р°.\n");
                 cleaning_buffer();
             }
         }
@@ -48,7 +50,7 @@ void entering_values(double values_coefficients[3])
 }
 
 
-//Очистка буффера ввода
+//РћС‡РёСЃС‚РєР° Р±СѓС„С„РµСЂР° РІРІРѕРґР°
 void cleaning_buffer()
 {
     int ch = 0;
@@ -56,58 +58,78 @@ void cleaning_buffer()
 }
 
 
-//Определение количества решений
-//int def_quantity(values_coefficients)
-//{
-//    double discriminant;
-//    int amount = 3;
-//    if (a == 0)
-//    {
-//        printf("Это линейное уравнение!\n");
-//        if (b == 0)
-//        {
-//            if (c == 0)
-//            {
-//                amount = 3;
-//                printf("Количесвто решений - INF.\n");
-//            }
-//            else
-//                amount = 0;
-//                printf("Количесвто решений - 0.\n");
-//        }
-//        else
-//            amount = -1;
-//            printf("Количесвто решений - 1.\n");
-//    }
-//    else
-//    {
-//        printf("Это квадратное уравнение!\n");
-//        discriminant = values_coefficients[1] * values_coefficients[1] - 4 * values_coefficients[0] * values_coefficients[2];
-//        if (discriminant < 0)
-//            amount = 0;
-//            printf("Количесвто решений - 0.\n");
-//        else if (abs(discriminant - 0) < EPSILON)
-//            amount = 1;
-//            printf("Количесвто решений - 1.\n");
-//        else if (discriminant > 0)
-//            amount = 2;
-//            printf("Количесвто решений - 2.\n");
-//    }
-//    return amount;
-//}
-//
-//
-//Вычисление решений
-//void calculations()
-//{
-//    double x1, x2;
-//    switch(amount)
-//    {
-//        case -1:
-//            x1 = ((-1) * values_coefficients[2]) / values_coefficients[1];
-//            printf("x = %lf", x1)
-//            break;
-//        case 1:
-//            x = ((-1) * values_coefficients[1]) / ();
-//    }
-//}
+//РћРїСЂРµРґРµР»РµРЅРёРµ РєРѕР»РёС‡РµСЃС‚РІР° СЂРµС€РµРЅРёР№
+int def_quantity(double values_coefficients[3])
+{
+    double discriminant;
+    int amount = 3;
+    if (values_coefficients[0] == 0)
+    {
+        printf("Р­С‚Рѕ Р»РёРЅРµР№РЅРѕРµ СѓСЂР°РІРЅРµРЅРёРµ!\n");
+        if (values_coefficients[1] == 0)
+        {
+            if (values_coefficients[2] == 0)
+            {
+                amount = 3;
+                printf("РљРѕР»РёС‡РµСЃРІС‚Рѕ СЂРµС€РµРЅРёР№ - INF.\n");
+            }
+            else
+            {
+                amount = 0;
+                printf("РљРѕР»РёС‡РµСЃРІС‚Рѕ СЂРµС€РµРЅРёР№ - 0.\n");
+            }
+        }
+        else
+        {
+            amount = -1;
+            printf("РљРѕР»РёС‡РµСЃРІС‚Рѕ СЂРµС€РµРЅРёР№ - 1.\n");
+        }
+    }
+    else
+    {
+        printf("Р­С‚Рѕ РєРІР°РґСЂР°С‚РЅРѕРµ СѓСЂР°РІРЅРµРЅРёРµ!\n");
+        discriminant = values_coefficients[1] * values_coefficients[1] - 4 * values_coefficients[0] * values_coefficients[2];
+        if (discriminant < 0)
+        {
+            amount = 0;
+            printf("РљРѕР»РёС‡РµСЃРІС‚Рѕ СЂРµС€РµРЅРёР№ - 0.\n");
+
+        }
+        else if (fabs(discriminant - 0) < EPSILON)
+        {
+            amount = 1;
+            printf("РљРѕР»РёС‡РµСЃРІС‚Рѕ СЂРµС€РµРЅРёР№ - 1.\n");
+        }
+        else if (discriminant > 0)
+        {
+            amount = 2;
+            printf("РљРѕР»РёС‡РµСЃРІС‚Рѕ СЂРµС€РµРЅРёР№ - 2.\n");
+        }
+    }
+    return amount;
+}
+
+
+//Р’С‹С‡РёСЃР»РµРЅРёРµ СЂРµС€РµРЅРёР№ Рё РёС… РІС‹РІРѕРґ
+void calculations(double values_coefficients[3], int amount)
+{
+    double x1, x2;
+    switch (amount)
+    {
+    case -1:
+        x1 = ((-1) * values_coefficients[2]) / values_coefficients[1];
+        printf("x = %lf", x1);
+        break;
+    case 1:
+        x1 = ((-1) * values_coefficients[1]) / (2 * values_coefficients[0]);
+        printf("x = %lf", x1);
+        break;
+    case 2:
+        double discriminant = values_coefficients[1] * values_coefficients[1] - 4 * values_coefficients[0] * values_coefficients[2];
+        x1 = ((-1) * values_coefficients[1] - sqrt(discriminant)) / (2 * values_coefficients[0]);
+        x2 = ((-1) * values_coefficients[1] + sqrt(discriminant)) / (2 * values_coefficients[0]);
+        printf("x1 = %lf\n", x1);
+        printf("x2 = %lf", x2);
+        break;
+    }
+}
