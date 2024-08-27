@@ -1,5 +1,6 @@
 //#include <TXLib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <iostream>
 #include <math.h>
 #include <assert.h>
@@ -34,10 +35,19 @@ struct run_tests
 };
 
 
+struct in_data_double
+{
+    int is_double = 0;
+    double num = NAN;
+};
+
+
 //Объявление функций программы
 void solver_quad_equation();
 void entering_values(struct params_eq* const coefficients);
 void working_eq(struct params_eq coefficients, struct ans_eq* const solutions);
+void scan_individ(struct in_data_double* coeff);
+void scan_individ_assign(struct in_data_double* const coeff, const int ch, const int i, char* entrance_data);
 void cleaning_buffer();
 int def_quantity(const struct params_eq coefficients, const struct ans_eq* const solutions, const double disc);
 double calc_disc(const struct params_eq coefficients);
@@ -47,7 +57,7 @@ void print_solutions(const struct params_eq coefficients, struct ans_eq solution
 void is_eq_linear(const struct params_eq coefficients, struct ans_eq* const solutions);
 void sort_roots(struct ans_eq* const solutions);
 double zero_mistake(const double x);
-void next_eq(int* const selector);
+void entering_zero_one(int* const selector, bool where_called);
 void print_quant_eq(int numb_iter);
 void unit_tests();
 void transf_data_struc(const struct run_tests data[13], struct params_eq* const test_p, const int num);
@@ -57,7 +67,10 @@ double round_decimals(const double value);
 
 const double EPSILON = 1e-9;
 const char NAME_COEFFICIENTS[] = "abc";
+const char NEXT_EQ_WORDS[] = "\nХотите ли вы ввести новое уравнене ? (1 - Да, 0 - Нет) - ";
+const char TESTING_WORDS[] = "\nХотитие ли вы запустить автоматическое тестирование программы? - (1 - Да, 0- Нет) - ";
 const double MULTIPLIER = 1e5;
+
 
 enum roots_count
 {
@@ -73,21 +86,40 @@ enum color_codes
     RED = 4,
     GREEN = 10,
     WHITE = 15,
+    WARNING = 244,
+};
+
+
+enum add_entering_words
+{
+    BOOL_TESTING_WORDS = 0,
+    BOOL_NEXT_EQ_WORDS = 1,
 };
 
 
 int main()
 {
     setlocale(LC_ALL, "Russian");
-    //printf("Хотитие ли вы запустить автоматическое тестирование программы? - (1 - Да, 0- Нет) - ");
-    //scanf();
-    unit_tests(); /*Функция, тестирующая программу уравнениями*/
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, WARNING);
+    printf("При вводе можно вводить не более 10 символов!!!\n");
+    SetConsoleTextAttribute(hConsole, WHITE);
     int selector = -1;
+    do
+    {
+        entering_zero_one(&selector, BOOL_TESTING_WORDS); /*Функция для считывания только 0 или 1*/
+    } while (selector == -1);
+    if (selector == 1)
+    {
+        unit_tests(); /*Функция, тестирующая программу уравнениями*/
+        printf("\n");
+    }
+    selector = -1;
     int numb_iter = 0;
     do
     {
         solver_quad_equation(); /*Главная функция по решению квадратных уравнений*/
-        next_eq(&selector); /*Функция перехода к следующему уравнению*/
+        entering_zero_one(&selector, BOOL_NEXT_EQ_WORDS); /*Функция для считывания только 0 или 1*/
         numb_iter++;
     } while (selector);
     print_quant_eq(numb_iter); /*Вывод количества решённых уравнений*/
@@ -112,20 +144,19 @@ void entering_values(struct params_eq* const coefficients)
 {
     assert(coefficients != NULL);
 
-    double* values_coefficients[3] = { &((*coefficients).a), &((*coefficients).b), &((*coefficients).c) };
+    double* const values_coefficients[3] = { &((*coefficients).a), &((*coefficients).b), &((*coefficients).c) };
     for (int i = 0; i < 3; i++)
     {
-        char tmp = 0;
-        int res = 0;
+        struct in_data_double coeff;
         do
         {
+            coeff.is_double = 0;
+            coeff.num = NAN;
             printf("Введите коэффициент %c: ", NAME_COEFFICIENTS[i]);
-            res = scanf_s("%lf%c", values_coefficients[i], &tmp);
-            if (/*isnan(*values_coefficients[i]) || isinf(*values_coefficients[i]) ||*/ tmp != '\n')
-                printf("Ошибка!\nМожно вводить только числа.\n");
-            if ((res != 2 || tmp != '\n') && tmp != 26)
-                cleaning_buffer();
-        } while (tmp != '\n' || res != 2 /*|| isnan(*values_coefficients[i]) || isinf(*values_coefficients[i])*/);
+            scan_individ(&coeff); /*Считывание чисел double*/
+            if (coeff.is_double != 0)
+                *values_coefficients[i] = coeff.num;
+        } while (coeff.is_double == 0);
     }
 }
 
@@ -139,6 +170,70 @@ void working_eq(struct params_eq coefficients, struct ans_eq* const solutions)
         disc = calc_disc(coefficients); /*Вычисление дискриминанта*/
     (*solutions).roots_numb = def_quantity(coefficients, solutions, disc); /*Определение количества решений*/
     calculations(coefficients, solutions, disc); /*Вычисление корней уравнения*/
+}
+
+
+//Считывание чисел double
+void scan_individ(struct in_data_double* const coeff)
+{
+    assert(coeff != NULL);
+
+    int ch = 0;
+    char entrance_data[11] = { 0 };
+    int i = 0;
+    for (i = 0; i < 11; i++)
+    {
+        ch = getchar();
+        entrance_data[i] = ch;
+        if (ch == EOF || ch == 26)
+            break;
+        if (ch == '\n')
+        {
+            i++;
+            break;
+        }
+    }
+    i--;
+    scan_individ_assign(coeff, ch, i, entrance_data); /*Присваивание переменных после ввода в функции scan_individ*/
+}
+
+
+//Присваивание переменных после ввода в функции scan_individ
+void scan_individ_assign(struct in_data_double* const coeff, const int ch, const int i, char* entrance_data)
+{
+    if ((i == 0 && ch == 10) || (ch == 26 || ch == -1))
+    {
+        printf("Ошибка!\nМожно вводить только числа.\n");
+        (*coeff).is_double = 0;
+    }
+    else if (i == 10 && ch != '\n')
+    {
+        cleaning_buffer(); /*Очистка буффера ввода*/
+        printf("Можно вводить не более десяти символов!\n");
+        (*coeff).is_double = 0;
+    }
+    else
+    {
+        entrance_data[i] = '\0';
+        char* endptr = NULL;
+        const double num = strtod(entrance_data, &endptr);
+        if (*endptr == '\0')
+            if (isfinite(num))
+            {
+                (*coeff).is_double = 1;
+                (*coeff).num = num;
+            }
+            else
+            {
+                printf("Ошибка!\nМожно вводить только числа.\n");
+                (*coeff).is_double = 0;
+            }
+        else
+        {
+            printf("Ошибка!\nМожно вводить только числа.\n");
+            (*coeff).is_double = 0;
+        }
+    }
 }
 
 
@@ -206,6 +301,7 @@ void calculations(const struct params_eq coefficients, struct ans_eq* const solu
             (*solutions).x1 = ((-1) * coefficients.c) / coefficients.b;
         else
             (*solutions).x1 = ((-1) * coefficients.b) / (2 * coefficients.a);
+        (*solutions).x1 = zero_mistake((*solutions).x1);
         break;
     case TWO_ROOTS:
         assert(isfinite(disc));
@@ -213,6 +309,8 @@ void calculations(const struct params_eq coefficients, struct ans_eq* const solu
         const double sqrt_disc = sqrt(disc);
         (*solutions).x1 = ((-1) * coefficients.b - sqrt_disc) / (2 * coefficients.a);
         (*solutions).x2 = ((-1) * coefficients.b + sqrt_disc) / (2 * coefficients.a);
+        (*solutions).x1 = zero_mistake((*solutions).x1);
+        (*solutions).x1 = zero_mistake((*solutions).x1);
         break;
     }
 }
@@ -234,14 +332,11 @@ void print_solutions(const struct params_eq coefficients, struct ans_eq solution
         printf("Количество решений - INF.\n");
         break;
     case ONE_ROOT:
-        solutions.x1 = zero_mistake(solutions.x1);
         printf("Количество решений - 1.\n");
         printf("x = %lf\n", solutions.x1);
         break;
     case TWO_ROOTS:
-        solutions.x1 = zero_mistake(solutions.x1);
-        solutions.x2 = zero_mistake(solutions.x2);
-        sort_roots(&solutions);
+        sort_roots(&solutions); /*Функция для вывода от меньшего к большего*/
         printf("Количество решений - 2.\n");
         printf("x1 = %.9lf\nx2 = %lf\n", solutions.x1, solutions.x2);
         break;
@@ -287,23 +382,29 @@ double zero_mistake(const double x)
 }
 
 
-//Функция перехода к следующему уравнению
-void next_eq(int* const selector)
+//Функция для считывания только 0 или 1
+void entering_zero_one(int* const selector, bool where_called)
 {
     assert(selector != NULL);
 
-    char tmp = 0;
-    const int flag = 1;
-    int res = 0;
+    const char* entering_words = TESTING_WORDS;
+    if (where_called == BOOL_NEXT_EQ_WORDS)
+        entering_words = NEXT_EQ_WORDS;
+    struct in_data_double follow_eq;
     do
     {
-        printf("\nХотите ли вы ввести новое уравнене? (1 - Да, 0- Нет) - ");
-        res = scanf_s("%d%c", selector, &tmp);
-        if (!(tmp == '\n' && ((*selector) == 0 || (*selector) == 1)))
-            printf("Ошибка!\nМожно вводить 0 или 1.\n");
-        if (res != 2 || tmp!= '\n')
-            cleaning_buffer();
-    } while (tmp != '\n' || res != 2 || (*selector != 1 && *selector != 0));
+        follow_eq.is_double = 0;
+        follow_eq.num = NAN;
+        printf(entering_words);
+        scan_individ(&follow_eq); /*Считывание чисел double*/
+        if (follow_eq.is_double != 0)
+            if (compare_doubles(follow_eq.num, 1))
+                *selector = 1;
+            else if (compare_doubles(follow_eq.num, 0))
+                *selector = 0;
+            else
+                printf("Ошибка!\nМожно вводить 0 или 1.\n");
+    } while (follow_eq.is_double == 0 || (*selector != 1 && *selector != 0));
     printf("\n");
 }
 
@@ -325,7 +426,7 @@ void print_quant_eq(const int numb_iter)
 //Функция, тестирующая программу уравнениями
 void unit_tests()
 {
-    const struct run_tests data[] = {{0, 0, 0, NAN, NAN, INF_ROOTS},
+    const struct run_tests data[] = { {0, 0, 0, NAN, NAN, INF_ROOTS},
                                 {5, 0, 0, 0, NAN, ONE_ROOT},
                                 {0, 5, 0, 0, NAN, ONE_ROOT},
                                 {0, 0, 5, NAN, NAN, NO_ROOT},
@@ -333,26 +434,26 @@ void unit_tests()
                                 {2, 0, 5, NAN, NAN, NO_ROOT},
                                 {2, 5, 0, -2.5, 0, TWO_ROOTS},
                                 {1, 3, 2, -2, -1, TWO_ROOTS},
-                                {1, 2, 1, -1, NAN, ONE_ROOT}, 
+                                {1, 2, 1, -1, NAN, ONE_ROOT},
                                 {1, -5, -7, -1.14005, 6.14005, TWO_ROOTS},
-                                {0.2, -0.25, -0.258, -0.67139, 1.92139, TWO_ROOTS}, 
+                                {0.2, -0.25, -0.258, -0.67139, 1.92139, TWO_ROOTS},
                                 {0.582, 0, -0.256, -0.66322, 0.66322, TWO_ROOTS},
                                 {2, -0.525, 0.26, NAN, NAN, NO_ROOT} };
     for (int i = 0; i < sizeof(data) / sizeof(data[0]); i++)
     {
         struct params_eq test_p;
         struct ans_eq test_a;
-        int flag = 0;
-        transf_data_struc(data, &test_p, i);
-        working_eq(test_p, &test_a);
+        int is_same = 0;
+        transf_data_struc(data, &test_p, i); /*Перенос данных тестов в структуры программы*/
+        working_eq(test_p, &test_a); /*Вычисления для уравнения с уже имеющимися коэффициентами*/
         HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
         if (test_a.roots_numb == data[i].roots_numb)
-            flag++;
+            is_same++;
         if (compare_sol(test_a.x1, data[i].x1))
-            flag++;
+            is_same++;
         if (compare_sol(test_a.x2, data[i].x2))
-            flag++;
-        if (flag == 3)
+            is_same++;
+        if (is_same == 3)
         {
             SetConsoleTextAttribute(hConsole, GREEN);
             printf("Test №%d is successful\n", i + 1);
@@ -385,7 +486,8 @@ bool compare_sol(const double a, const double b)
         return ((isnan(a) && isnan(b)) || (isinf(a) && isinf(b)));
     else
     {
-        assert(isfinite(a) && isfinite(b));
+        assert(isfinite(a));
+        assert(isfinite(b));
 
         return compare_doubles(round_decimals(a), round_decimals(b));
     }
@@ -393,7 +495,7 @@ bool compare_sol(const double a, const double b)
 
 
 // Функция для округления числа до заданного количества знаков после запятой
-double round_decimals(const double value) 
+double round_decimals(const double value)
 {
     assert(isfinite(value));
 
